@@ -9,12 +9,18 @@ import Text.Printf
 
 import qualified Data.Set as S
 
+{-|
+ - Internal representation of options of the program.
+ -}
 data Flag
-    = Internal              -- -i
-    | PrintCFG              -- -1
-    | CFG2CNF               -- -2
+    = Internal  -- ^ The `-i` option.
+    | PrintCFG  -- ^ The `-1` option.
+    | CFG2CNF   -- ^ The `-2` option.
     deriving (Eq,Ord,Enum,Show,Bounded)
 
+{-|
+ - List of options containg their description and expected command line flag.
+ -}
 flags =
     [Option ['i'] []    (NoArg Internal)
         "Prints loaded CFG on stdout."
@@ -64,20 +70,27 @@ parseArgs argv = case getOpt Permute flags argv of
 
     where header = "Usage: bkg-2-cnf <options> [input]"
 
-data Nonterminal = Nonterminal Char String deriving (Show)
-type Terminal = Char
+data Nonterminal = Nonterminal Char deriving (Eq, Show, Read)
+data Terminal = Terminal Char deriving (Eq, Show, Read)
 type Sentence = [Either Terminal Nonterminal]
 type Rule = (Nonterminal, Sentence)
-
-data ContextFreeGrammar = CFG { n :: S.Set Nonterminal
-                                , e :: S.Set Terminal
-                                , p :: S.Set Rule
-                                , s :: Nonterminal
-                                } deriving (Show)
+ 
+{-|
+ - Internal representation of a context-gree grammar.
+ -}
+data ContextFreeGrammar = CFG {
+    n :: S.Set Nonterminal, -- ^ Set of non-terminals.
+    e :: S.Set Terminal,    -- ^ Set of terminals.
+    s :: Nonterminal,       -- ^ Initial non-terminal.
+    p :: S.Set Rule         -- ^ Set of rules.
+} deriving (Show)
 
 main = do
     args <- getArgs >>= parseArgs
 
-    case args of
-        (_, Nothing) -> putStrLn "Nothing"
-        (_, Just file) -> putStrLn $ show file
+    content <- case args of
+        (_, Nothing) -> getContents
+        (_, Just file) -> readFile file
+
+    putStr content
+    return ()
