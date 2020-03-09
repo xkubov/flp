@@ -150,15 +150,27 @@ validate cfg@CFG{..} = if allOK then Right cfg else Left "invalid CFG"
   where
     allOK = initS `elem` nonterminals
 
+cfgReduceTrivial :: CFGrammar -> CFGrammar
+cfgReduceTrivial cfg = cfg
+
+cfgChomskyTransform :: CFGrammar -> CFGrammar
+cfgChomskyTransform cfg = cfg
+
+provideAction :: Flag -> CFGrammar -> IO()
+provideAction flag
+    | flag == Internal = putStrLn . show
+    | flag == PrintCFG = putStrLn . show . cfgReduceTrivial
+    | flag == CFG2CNF = putStrLn . show . cfgChomskyTransform . cfgReduceTrivial
+
 main = do
-    args <- getArgs >>= parseArgs
+    (flag, file) <- getArgs >>= parseArgs
 
-    content <- case args of
-        (_, Nothing) -> getContents
-        (_, Just file) -> readFile file
+    content <- case file of
+        Nothing -> getContents
+        Just file -> readFile file
 
-    putStrLn $ case parseCFG content of
-        (Right cfg) -> show cfg
-        (Left string) -> show string
-
-    return ()
+    case parseCFG content of
+        Right cfg -> provideAction flag cfg
+        Left error -> do
+            hPutStrLn stderr $ "error: unable to parse CFG: " ++ unwords (lines error)
+            exitWith $ ExitFailure 1
