@@ -145,13 +145,21 @@ comma :: Parser Char
 comma = char ','
 
 -- TODO: better validation
+-- validate: non-empty terms, non-terms -> what about rules?
+-- disjunkt terms and non-terms
 validate :: CFGrammar -> Either String CFGrammar
 validate cfg@CFG{..} = if allOK then Right cfg else Left "invalid CFG"
   where
     allOK = initS `elem` nonterminals
 
+--transitiveClosure :: [Rule] -> [Rule]
+--transitiveClosure closure
+--    | closure == closureUntilNow = closure
+--    | otherwise                  = transitiveClosure closureUntilNow
+--    where closureUntilNow = nub $ closure ++ [(Rule x z) | (Rule x y) <- closure, (Rule y' z) <- closure, y == y']
+
 cfgReduceTrivial :: CFGrammar -> CFGrammar
-cfgReduceTrivial cfg = cfg
+cfgReduceTrivial (CFG nonterms terms initS rules) = CFG nonterms terms initS [] -- TODO
 
 cfgChomskyTransform :: CFGrammar -> CFGrammar
 cfgChomskyTransform cfg = cfg
