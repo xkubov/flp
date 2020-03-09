@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 import Control.Monad
 import Data.Char
 import Data.List
@@ -6,6 +8,14 @@ import System.Environment
 import System.Exit
 import System.IO
 import Text.Printf
+
+import Control.Applicative ((<$>), (<*>), (<$), (<*), (<|>))
+import Control.Arrow (left)
+import Control.Monad ((<=<))
+import Data.Bool (bool)
+import Text.Parsec (Parsec, ParseError, parse, choice,
+        newline, alphaNum, string, char, satisfy, sepBy1, endBy, many1)
+import Text.Parsec.String (Parser)
 
 import qualified Data.Set as S
 
@@ -70,20 +80,75 @@ parseArgs argv = case getOpt Permute flags argv of
 
     where header = "Usage: bkg-2-cnf <options> [input]"
 
-data Nonterminal = Nonterminal Char deriving (Eq, Show, Read)
-data Terminal = Terminal Char deriving (Eq, Show, Read)
-type Sentence = [Either Terminal Nonterminal]
-type Rule = (Nonterminal, Sentence)
+type Nonterminal = Char
+type Terminal = Char
+type Sentence = [Char]
+data Rule = Rule Nonterminal Sentence deriving (Eq)
+
+instance Show Rule where
+    show (Rule nt st) = intercalate "->" [[nt], st]
  
 {-|
  - Internal representation of a context-gree grammar.
  -}
-data ContextFreeGrammar = CFG {
-    n :: S.Set Nonterminal, -- ^ Set of non-terminals.
-    e :: S.Set Terminal,    -- ^ Set of terminals.
-    s :: Nonterminal,       -- ^ Initial non-terminal.
-    p :: S.Set Rule         -- ^ Set of rules.
-} deriving (Show)
+data CFGrammar = CFG {
+    nonterminals :: [Nonterminal], -- ^ Set of non-terminals.
+    terminals :: [Terminal],       -- ^ Set of terminals.
+    initS :: Nonterminal,          -- ^ Initial non-terminal.
+    rules :: [Rule]                -- ^ Set of rules.
+} deriving (Eq)
+
+instance Show CFGrammar where
+    show CFG{..} = unlines $
+        [intercalate "," $ map (\x -> [x]) nonterminals,
+         intercalate "," $ map (\x -> [x]) terminals,
+         [initS]
+        ] ++ map show rules
+
+parseCFG :: String -> Either String CFGrammar
+parseCFG = validate <=< left show . parse cfgParser ""
+
+cfgParser :: Parser CFGrammar
+cfgParser = CFG <$> nontermSetParser        <* newline
+                <*> termSetParser           <* newline
+                <*> nontermParser <* newline
+                <*> ruleSetParser
+
+nontermSetParser :: Parser [Nonterminal]
+nontermSetParser = sepBy1 nontermParser comma
+
+-- TODO: more conditions
+nontermParser :: Parser Nonterminal
+nontermParser = satisfy isUpper 
+
+termSetParser :: Parser [Terminal]
+termSetParser = sepBy1 termParser comma
+
+-- TODO: more conditions
+termParser :: Parser Terminal
+termParser = satisfy isLower
+
+-- TODO: join with term/nonterm parsers
+termNontermParser :: Parser Char
+termNontermParser = choice [termParser, nontermParser]
+
+sentenceParser :: Parser Sentence 
+sentenceParser = many1 termNontermParser
+
+ruleSetParser :: Parser [Rule]
+ruleSetParser = endBy ruleParser newline
+
+ruleParser :: Parser Rule
+ruleParser = Rule <$> nontermParser <* (string "->") <*> sentenceParser
+
+comma :: Parser Char
+comma = char ','
+
+-- TODO: better validation
+validate :: CFGrammar -> Either String CFGrammar
+validate cfg@CFG{..} = if allOK then Right cfg else Left "invalid CFG"
+  where
+    allOK = initS `elem` nonterminals
 
 main = do
     args <- getArgs >>= parseArgs
@@ -92,5 +157,8 @@ main = do
         (_, Nothing) -> getContents
         (_, Just file) -> readFile file
 
-    putStr content
+    putStrLn $ case parseCFG content of
+        (Right cfg) -> show cfg
+        (Left string) -> show string
+
     return ()
