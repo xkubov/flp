@@ -14,8 +14,8 @@ SRC_DIR=src
 SRC=$(SRC_DIR)/bkg-2-cnf.hs
 
 $(PROJ): $(SRC)
-	$(HC) $(SRC) -o $(PROJ)
+	$(HC) -i$(SRC_DIR) $(SRC) -o $(PROJ)
 
 .PHONY:
 clean:
-	@rm $(PROJ) $(SRC_DIR)/$(PROJ).o $(SRC_DIR)/$(PROJ).hi
+	@rm $(PROJ) $(SRC_DIR)/*.o $(SRC_DIR)/*.hi

@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+module Main (main) where
 
 import Control.Monad
 import Data.Char
@@ -9,15 +9,8 @@ import System.Exit
 import System.IO
 import Text.Printf
 
-import Control.Applicative ((<$>), (<*>), (<$), (<*), (<|>))
-import Control.Arrow (left)
-import Control.Monad ((<=<))
-import Data.Bool (bool)
-import Text.Parsec (Parsec, ParseError, parse, choice,
-        newline, alphaNum, string, char, satisfy, sepBy1, endBy, many1)
-import Text.Parsec.String (Parser)
-
-import qualified Data.Set as S
+import CFGData
+import CFGParse
 
 {-|
  - Internal representation of options of the program.
@@ -79,85 +72,6 @@ parseArgs argv = case getOpt Permute flags argv of
         exitWith (ExitFailure 1)
 
     where header = "Usage: bkg-2-cnf <options> [input]"
-
-type Nonterminal = Char
-type Terminal = Char
-type Sentence = [Char]
-data Rule = Rule Nonterminal Sentence deriving (Eq)
-
-instance Show Rule where
-    show (Rule nt st) = intercalate "->" [[nt], st]
- 
-{-|
- - Internal representation of a context-gree grammar.
- -}
-data CFGrammar = CFG {
-    nonterminals :: [Nonterminal], -- ^ Set of non-terminals.
-    terminals :: [Terminal],       -- ^ Set of terminals.
-    initS :: Nonterminal,          -- ^ Initial non-terminal.
-    rules :: [Rule]                -- ^ Set of rules.
-} deriving (Eq)
-
-instance Show CFGrammar where
-    show CFG{..} = unlines $
-        [intercalate "," $ map (\x -> [x]) nonterminals,
-         intercalate "," $ map (\x -> [x]) terminals,
-         [initS]
-        ] ++ map show rules
-
-parseCFG :: String -> Either String CFGrammar
-parseCFG = validate <=< left show . parse cfgParser ""
-
-cfgParser :: Parser CFGrammar
-cfgParser = CFG <$> nontermSetParser        <* newline
-                <*> termSetParser           <* newline
-                <*> nontermParser <* newline
-                <*> ruleSetParser
-
-nontermSetParser :: Parser [Nonterminal]
-nontermSetParser = sepBy1 nontermParser comma
-
--- TODO: more conditions
-nontermParser :: Parser Nonterminal
-nontermParser = satisfy isUpper 
-
-termSetParser :: Parser [Terminal]
-termSetParser = sepBy1 termParser comma
-
--- TODO: more conditions
-termParser :: Parser Terminal
-termParser = satisfy isLower
-
--- TODO: join with term/nonterm parsers
-termNontermParser :: Parser Char
-termNontermParser = choice [termParser, nontermParser]
-
-sentenceParser :: Parser Sentence 
-sentenceParser = many1 termNontermParser
-
-ruleSetParser :: Parser [Rule]
-ruleSetParser = endBy ruleParser newline
-
-ruleParser :: Parser Rule
-ruleParser = Rule <$> nontermParser <* (string "->") <*> sentenceParser
-
-comma :: Parser Char
-comma = char ','
-
-validate :: CFGrammar -> Either String CFGrammar
-validate cfg@CFG{..} = if allOK then Right cfg else
-                            if initialInNonterms == False then Left $ "nonterminal "++[initS]++" is not member of [" ++
-                                                                    (intercalate "," $ map (\x -> [x]) nonterminals) ++ "]"
-                            else if disjointTermsNonterms == False then Left $ "sets of terms and nonterms are not disjoint. Common symbols: "
-                                                                                                            ++ show (terminals `union` nonterminals)
-                            else if validRules == False then Left $ "specified CFG has invalid rules"
-                            else Left "invalid CFG"
-  where
-    allOK = initialInNonterms && disjointTermsNonterms && validRules
-    initialInNonterms = initS `elem` nonterminals
-    disjointTermsNonterms = terminals `intersect` nonterminals == []
-    validRules = and [nt `elem` nonterminals | Rule nt _ <- rules]
-        && and [x `elem` (terminals `union` nonterminals) | Rule _ alpha <- rules, x <- alpha]
 
 --transitiveClosure :: [Rule] -> [Rule]
 --transitiveClosure closure
