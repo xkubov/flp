@@ -49,6 +49,8 @@ ruleParser = Rule <$> nontermParser <* string "->" <*> sentenceParser
 comma :: Parser Char
 comma = char ','
 
+-- TODO: check loops
+-- TODO: check retarded symbols
 validate :: CFGrammar -> Either String CFGrammar
 validate cfg@CFG{..}
     | allOK = Right cfg

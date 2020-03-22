@@ -30,6 +30,31 @@ instance Show CFGrammar where
          [initS]
         ] ++ map show rules
 
+type ExtNonterminal = String
+type ExtTerminal = String
+type ExtSentence = [String]
+data ExtRule = ExtRule ExtNonterminal ExtSentence deriving (Eq)
+
+instance Show ExtRule where
+    show (ExtRule nt st) = intercalate "->" [nt, intercalate "" st]
+
+{-|
+ - Internal representation of a context-gree grammar.
+ -}
+data ExtCFGrammar = ExtCFG {
+    extNonterminals :: [ExtNonterminal], -- ^ Set of non-terminals.
+    extTerminals :: [ExtTerminal],       -- ^ Set of terminals.
+    extInitS :: ExtNonterminal,          -- ^ Initial non-terminal.
+    extRules :: [ExtRule]                -- ^ Set of rules.
+} deriving (Eq)
+
+instance Show ExtCFGrammar where
+    show ExtCFG{..} = unlines $
+        [intercalate "," extNonterminals,
+         intercalate "," extTerminals,
+         extInitS
+        ] ++ map show extRules
+
 isTerminal :: Char -> Bool
 isTerminal x = isLower x && x `elem` ['a'..'z']
 

@@ -101,10 +101,15 @@ cfgReduceTrivial (CFG nts ts s rules) = CFG nts ts s newrules
             a <- nts,
             b `elem` triviallyReachableFrom [a] rules]
 
-cfgChomskyTransform :: CFGrammar -> CFGrammar
-cfgChomskyTransform (CFG nts ts s rules) = CFG nts ts s newrules
-    where newrules = [r | r@(Rule _ [a]) <- rules, isTerminal a]
-                        ++ [r | r@(Rule _ [a,b]) <- rules, all isNonterminal [a,b]]
+transformRule :: Rule -> [ExtRule]
+transformRule (Rule n alpha) = case alpha of
+        [a] -> [ExtRule [n] [[a]]]
+        [a,b] -> [ExtRule [n] [[a], [b]]]
+
+cfgChomskyTransform :: CFGrammar -> ExtCFGrammar
+cfgChomskyTransform (CFG nts ts s rules) =
+        ExtCFG (map (:[]) nts) (map (:[]) ts) [s] newrules
+    where newrules = [nr | r <- rules, nr <- transformRule r]
 
 provideAction :: Flag -> CFGrammar -> IO()
 provideAction flag
