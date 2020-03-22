@@ -144,13 +144,20 @@ ruleParser = Rule <$> nontermParser <* (string "->") <*> sentenceParser
 comma :: Parser Char
 comma = char ','
 
--- TODO: better validation
--- validate: non-empty terms, non-terms -> what about rules?
--- disjunkt terms and non-terms
 validate :: CFGrammar -> Either String CFGrammar
-validate cfg@CFG{..} = if allOK then Right cfg else Left "invalid CFG"
+validate cfg@CFG{..} = if allOK then Right cfg else
+                            if initialInNonterms == False then Left $ "nonterminal "++[initS]++" is not member of [" ++
+                                                                    (intercalate "," $ map (\x -> [x]) nonterminals) ++ "]"
+                            else if disjointTermsNonterms == False then Left $ "sets of terms and nonterms are not disjoint. Common symbols: "
+                                                                                                            ++ show (terminals `union` nonterminals)
+                            else if validRules == False then Left $ "specified CFG has invalid rules"
+                            else Left "invalid CFG"
   where
-    allOK = initS `elem` nonterminals
+    allOK = initialInNonterms && disjointTermsNonterms && validRules
+    initialInNonterms = initS `elem` nonterminals
+    disjointTermsNonterms = terminals `intersect` nonterminals == []
+    validRules = and [nt `elem` nonterminals | Rule nt _ <- rules]
+        && and [x `elem` (terminals `union` nonterminals) | Rule _ alpha <- rules, x <- alpha]
 
 --transitiveClosure :: [Rule] -> [Rule]
 --transitiveClosure closure
