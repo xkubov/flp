@@ -80,10 +80,10 @@ parseArgs argv = case getOpt Permute flags argv of
  -
  - Exapmle of trivial rules is: A->B
  -}
-trivialyReachableFrom :: String -> [Rule] -> String
-trivialyReachableFrom closure rules
+triviallyReachableFrom :: String -> [Rule] -> String
+triviallyReachableFrom closure rules
     | closure == closureUntilNow = closure
-    | otherwise                  = trivialyReachableFrom closureUntilNow rules
+    | otherwise                  = triviallyReachableFrom closureUntilNow rules
     where closureUntilNow = nub $ closure
             ++ [c | Rule b [c] <- rules, isNonterminal c, b `elem` closure]
 
@@ -99,7 +99,7 @@ cfgReduceTrivial (CFG nts ts s rules) = CFG nts ts s newrules
             -- Take only nontrivial rules: first symbol isNonterminal => lenght > 1
             Rule b alpha@(f:_) <- rules, isTerminal f || ((>1).length) alpha,
             a <- nts,
-            b `elem` trivialyReachableFrom [a] rules]
+            b `elem` triviallyReachableFrom [a] rules]
 
 cfgChomskyTransform :: CFGrammar -> CFGrammar
 cfgChomskyTransform (CFG nts ts s rules) = CFG nts ts s newrules
