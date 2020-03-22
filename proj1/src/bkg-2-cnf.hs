@@ -73,24 +73,38 @@ parseArgs argv = case getOpt Permute flags argv of
 
     where header = "Usage: bkg-2-cnf <options> [input]"
 
-transitiveClosure :: [Char] -> [Rule] -> [Char]
-transitiveClosure closure rules
+{-|
+ - First part of the algorithm 4.5 from TIN.
+ - Computes set of reachable nonterminals by following
+ - trivial rules.
+ -
+ - Exapmle of trivial rules is: A->B
+ -}
+trivialyReachableFrom :: String -> [Rule] -> String
+trivialyReachableFrom closure rules
     | closure == closureUntilNow = closure
-    | otherwise                  = transitiveClosure closureUntilNow rules
+    | otherwise                  = trivialyReachableFrom closureUntilNow rules
     where closureUntilNow = nub $ closure
             ++ [c | Rule b [c] <- rules, isNonterminal c, b `elem` closure]
 
+{-|
+ - Second part of the algorithm 4.5 from TIN.
+ - Transforms CFG into CFG with no trivial rules.
+ -
+ - Exapmle of trivial rules is: A->B
+ -}
 cfgReduceTrivial :: CFGrammar -> CFGrammar
-cfgReduceTrivial (CFG nonterms terms initS rules) = (
-        CFG nonterms terms initS [Rule a alpha |
-            -- Take only nontrivial rules: isNonterminal => lenght > 1
+cfgReduceTrivial (CFG nts ts s rules) = CFG nts ts s newrules
+    where newrules = [Rule a alpha |
+            -- Take only nontrivial rules: first symbol isNonterminal => lenght > 1
             Rule b alpha@(f:_) <- rules, isTerminal f || ((>1).length) alpha,
-            a <- nonterms,
-            b `elem` transitiveClosure [a] rules]
-    )
+            a <- nts,
+            b `elem` trivialyReachableFrom [a] rules]
 
 cfgChomskyTransform :: CFGrammar -> CFGrammar
-cfgChomskyTransform cfg = cfg
+cfgChomskyTransform (CFG nts ts s rules) = CFG nts ts s newrules
+    where newrules = [r | r@(Rule _ [a]) <- rules, isTerminal a]
+                        ++ [r | r@(Rule _ [a,b]) <- rules, all isNonterminal [a,b]]
 
 provideAction :: Flag -> CFGrammar -> IO()
 provideAction flag
@@ -101,9 +115,7 @@ provideAction flag
 main = do
     (flag, file) <- getArgs >>= parseArgs
 
-    content <- case file of
-        Nothing -> getContents
-        Just file -> readFile file
+    content <- maybe getContents readFile file
 
     case parseCFG content of
         Right cfg -> provideAction flag cfg

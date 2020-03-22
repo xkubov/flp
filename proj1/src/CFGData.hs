@@ -7,7 +7,7 @@ import Data.List
 
 type Nonterminal = Char
 type Terminal = Char
-type Sentence = [Char]
+type Sentence = String
 data Rule = Rule Nonterminal Sentence deriving (Eq)
 
 instance Show Rule where
@@ -25,8 +25,8 @@ data CFGrammar = CFG {
 
 instance Show CFGrammar where
     show CFG{..} = unlines $
-        [intercalate "," $ map (\x -> [x]) nonterminals,
-         intercalate "," $ map (\x -> [x]) terminals,
+        [intercalate "," $ map (: []) nonterminals,
+         intercalate "," $ map (: []) terminals,
          [initS]
         ] ++ map show rules
 
