@@ -5,12 +5,11 @@ module CFGParse where
 import Data.Char
 import Data.List
 
-import Control.Applicative ((<$>), (<*>), (<$), (<*), (<|>))
-import Control.Arrow (left)
-import Control.Monad ((<=<))
-import Text.Parsec (Parsec, ParseError, parse, choice,
-        newline, alphaNum, string, char, satisfy, sepBy1, endBy, many1)
-import Text.Parsec.String (Parser)
+import Control.Applicative
+import Control.Arrow
+import Control.Monad
+import Text.Parsec
+import Text.Parsec.String
 
 import CFGData
 
