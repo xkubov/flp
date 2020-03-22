@@ -26,18 +26,15 @@ cfgParser = CFG <$> nontermSetParser        <* newline
 nontermSetParser :: Parser [Nonterminal]
 nontermSetParser = sepBy1 nontermParser comma
 
--- TODO: more conditions
 nontermParser :: Parser Nonterminal
-nontermParser = satisfy isUpper 
+nontermParser = satisfy isNonterminal
 
 termSetParser :: Parser [Terminal]
 termSetParser = sepBy1 termParser comma
 
--- TODO: more conditions
 termParser :: Parser Terminal
-termParser = satisfy isLower
+termParser = satisfy isTerminal
 
--- TODO: join with term/nonterm parsers
 termNontermParser :: Parser Char
 termNontermParser = choice [termParser, nontermParser]
 

@@ -73,23 +73,30 @@ parseArgs argv = case getOpt Permute flags argv of
 
     where header = "Usage: bkg-2-cnf <options> [input]"
 
---transitiveClosure :: [Rule] -> [Rule]
---transitiveClosure closure
---    | closure == closureUntilNow = closure
---    | otherwise                  = transitiveClosure closureUntilNow
---    where closureUntilNow = nub $ closure ++ [(Rule x z) | (Rule x y) <- closure, (Rule y' z) <- closure, y == y']
+transitiveClosure :: [Char] -> [Rule] -> [Char]
+transitiveClosure closure rules
+    | closure == closureUntilNow = closure
+    | otherwise                  = transitiveClosure closureUntilNow rules
+    where closureUntilNow = nub $ closure
+            ++ [c | Rule b [c] <- rules, isNonterminal c, b `elem` closure]
 
 cfgReduceTrivial :: CFGrammar -> CFGrammar
-cfgReduceTrivial (CFG nonterms terms initS rules) = CFG nonterms terms initS [] -- TODO
+cfgReduceTrivial (CFG nonterms terms initS rules) = (
+        CFG nonterms terms initS [Rule a alpha |
+            -- Take only nontrivial rules: isNonterminal => lenght > 1
+            Rule b alpha@(f:_) <- rules, isTerminal f || ((>1).length) alpha,
+            a <- nonterms,
+            b `elem` transitiveClosure [a] rules]
+    )
 
 cfgChomskyTransform :: CFGrammar -> CFGrammar
 cfgChomskyTransform cfg = cfg
 
 provideAction :: Flag -> CFGrammar -> IO()
 provideAction flag
-    | flag == Internal = putStrLn . show
-    | flag == PrintCFG = putStrLn . show . cfgReduceTrivial
-    | flag == CFG2CNF = putStrLn . show . cfgChomskyTransform . cfgReduceTrivial
+    | flag == Internal = putStr . show
+    | flag == PrintCFG = putStr . show . cfgReduceTrivial
+    | flag == CFG2CNF = putStr . show . cfgChomskyTransform . cfgReduceTrivial
 
 main = do
     (flag, file) <- getArgs >>= parseArgs

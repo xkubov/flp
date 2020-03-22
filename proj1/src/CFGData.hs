@@ -29,3 +29,9 @@ instance Show CFGrammar where
          intercalate "," $ map (\x -> [x]) terminals,
          [initS]
         ] ++ map show rules
+
+isTerminal :: Char -> Bool
+isTerminal x = isLower x && x `elem` ['a'..'z']
+
+isNonterminal :: Char -> Bool
+isNonterminal x = isUpper x && x `elem` ['A'..'Z']
