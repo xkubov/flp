@@ -58,5 +58,11 @@ instance Show ExtCFGrammar where
 isTerminal :: Char -> Bool
 isTerminal x = isLower x && x `elem` ['a'..'z']
 
+isExtTerminal :: String -> Bool
+isExtTerminal x = length x == 1 && all isTerminal x
+
 isNonterminal :: Char -> Bool
 isNonterminal x = isUpper x && x `elem` ['A'..'Z']
+
+isExtNonterminal :: String -> Bool
+isExtNonterminal = not . isExtTerminal

@@ -101,15 +101,35 @@ cfgReduceTrivial (CFG nts ts s rules) = CFG nts ts s newrules
             a <- nts,
             b `elem` triviallyReachableFrom [a] rules]
 
-transformRule :: Rule -> [ExtRule]
-transformRule (Rule n alpha) = case alpha of
-        [a] -> [ExtRule [n] [[a]]]
-        [a,b] -> [ExtRule [n] [[a], [b]]]
+transformSymbol :: String -> (String, Maybe ExtRule)
+transformSymbol a
+    | isExtTerminal a = (nsym, Just (ExtRule nsym [a]))
+    | otherwise = (a, Nothing)
+    where nsym = a++"'"
+
+transformRule :: ExtRule -> ([ExtRule], [ExtNonterminal])
+transformRule rule@(ExtRule _ [_]) = ([rule], [])
+
+transformRule rule@(ExtRule n alpha@[_, _])
+    | all isExtNonterminal alpha = ([rule], [])
+    | otherwise = ([r | (_, Just r) <- map transformSymbol alpha] -- rules a'->a
+                    ++ [ExtRule n transalpha], -- New rule S -> a'A|Aa'|a'a'
+                  nub transalpha) -- After transformation alpha will be just nonterms
+    where transalpha = [s | (s, _) <- map transformSymbol alpha]
+
+transformRule (ExtRule n (f:alpha')) = (ExtRule n [h', newNt]:rules ++ hr', [h',newNt] ++ nts)
+        where (rules, nts) = transformRule (ExtRule newNt alpha')
+              newNt = "<"++intercalate "" alpha'++">"
+              (h', hr') = case transformSymbol f of
+                            (h, Just r) -> (h, [r])
+                            _ -> (f, [])
 
 cfgChomskyTransform :: CFGrammar -> ExtCFGrammar
 cfgChomskyTransform (CFG nts ts s rules) =
-        ExtCFG (map (:[]) nts) (map (:[]) ts) [s] newrules
-    where newrules = [nr | r <- rules, nr <- transformRule r]
+        ExtCFG (map (:[]) nts `union` newnts) (map (:[]) ts) [s] newrules
+    where newtransforms = [transformRule $ ExtRule [n] (map (:[]) alpha) | Rule n alpha <- rules]
+          newrules = nub [nr | (r, _) <- newtransforms, nr <- r]
+          newnts = nub [nn | (_, n) <- newtransforms, nn <- n]
 
 provideAction :: Flag -> CFGrammar -> IO()
 provideAction flag
