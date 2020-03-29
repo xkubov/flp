@@ -5,7 +5,7 @@ main :-
         ), error(MSG), (
             format('error: ~w\n', [MSG]), halt(1)
         )
-    ), abnormal_termination(MSG), (write(MSG), halt(0))
+    ), abnormal_termination(MSG), (write('abnormal termination\n'), halt(0))
 ).
 
 substitute([_|Tape], 0, C, [C|Tape]).
