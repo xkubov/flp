@@ -1,5 +1,4 @@
 main :-
-    prompt(_, ''),
     catch(
         catch((
             read_lines(X), parse_input(X, Tape), assert(pos(0)), assert(end_configuration([])), simulate_machine('S', Tape)
@@ -111,7 +110,7 @@ read_line(L, C) :- get_char(C), (
     )
 ).
 
-read_lines(Ls) :- read_line(L,C), (
+read_lines(Ls) :- prompt(_, ''), read_line(L,C), (
     C == end_of_file -> ( 
         Ls=[]
     ) ; (
