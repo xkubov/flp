@@ -23,7 +23,7 @@ aunt(X,Y) :- woman(X), sibling(X,Z), parent(Z,Y).
  * Homework #2
  *
  * Create join/3 functor that will join two input lists into third one.
- * 
+ *
  * Usage:
  * ```
  * join([1,2], [3,4], X).

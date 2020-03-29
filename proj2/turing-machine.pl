@@ -1,6 +1,6 @@
 /**
  * FLP Proeject 2 Turing Machine
- * 
+ *
  * This program simulates actions of Turing Machine
  * that are provided on STDIN.
  *
@@ -8,7 +8,7 @@
  * @date 21. 03. 2020
  */
 
-main :- 
+main :-
     catch(
         catch((
             read_lines(X), parse_input(X, Tape),
@@ -107,7 +107,7 @@ do_action(Tape, Action, NewTape) :- (
  * Prints lines provided in list on input.
  */
 print_lines([]).
-print_lines([H|T]) :- print_lines(T), write(H). 
+print_lines([H|T]) :- print_lines(T), write(H).
 
 /**
  * Tries path of performation with specified action and
@@ -137,7 +137,7 @@ try_action_paths(Q, Tape, [_|OtherPaths]) :- try_action_paths(Q, Tape, OtherPath
 /**
  * Simulates TM on tape specified as parameter. Simulation ends if state F is reached.
  */
-simulate_machine('F', Tape) :- 
+simulate_machine('F', Tape) :-
     format_configuration('F',Tape,Cfg), add_to_tm_end_configuration(Cfg),
     tm_end_configuration(X), print_lines(X), halt(0).
 simulate_machine(Q,Tape) :- get_head(Tape, Head), format_configuration(Q,Tape,Cfg), add_to_tm_end_configuration(Cfg),
@@ -195,12 +195,12 @@ read_line(L, C) :- get_char(C), (
  * Reads lines from STDIN until EOF is reached.
  */
 read_lines(Ls) :- prompt(_, ''), read_line(L,C), (
-    C == end_of_file -> ( 
+    C == end_of_file -> (
         Ls=[]
     ) ; (
         read_lines(LLs), [L|LLs] = Ls
     )
 ).
 
-is_eof_eol(C) :- C == end_of_file. 
+is_eof_eol(C) :- C == end_of_file.
 is_eof_eol(C) :- char_code(C, Code), Code == 10.

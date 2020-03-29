@@ -49,7 +49,7 @@ nontermSetParser = sepBy1 nontermParser comma
  - Parses nonterminal. Each nonterminal on input must be from [A-Z] set.
  -}
 nontermParser :: Parser Nonterminal
-nontermParser = do 
+nontermParser = do
     nt <- satisfy isNonterm
     return [nt]
 
@@ -78,7 +78,7 @@ termNontermParser = choice [termParser, nontermParser]
 {-|
  - Parses stream of terminals and nonterminals.
  -}
-sentenceParser :: Parser Sentence 
+sentenceParser :: Parser Sentence
 sentenceParser = many1 termNontermParser
 
 {-|
@@ -122,4 +122,3 @@ validate cfg@(CFG nonterminals terminals initS rules)
     disjointTermsNonterms = null $ terminals `intersect` nonterminals
     validRules = and [nt `elem` nonterminals | Rule nt _ <- rules]
         && and [x `elem` (terminals `union` nonterminals) | Rule _ alpha <- rules, x <- alpha]
-
