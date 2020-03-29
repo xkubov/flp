@@ -1,7 +1,7 @@
 /**
  * FLP Proeject 2 Turing Machine
  *
- * This program simulates actions of Turing Machine
+ * This program simulates actions of Nondeterministic Turing Machine
  * that are provided on STDIN.
  *
  * @author Peter Kubov (xkubov06@stud.fit.vutbr.cz)
