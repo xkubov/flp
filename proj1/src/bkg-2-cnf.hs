@@ -1,3 +1,14 @@
+{-|
+Module      : Main
+Description : Main module of the project.
+Author      : Peter Kubov
+License     : GPL-3
+Year        : 2020
+
+Contains main control flow of the application and implementation
+of algorithms from TIN.
+-}
+
 module Main (main) where
 
 import Control.Monad
@@ -101,22 +112,59 @@ cfgReduceTrivial (CFG nts ts s rules) = CFG nts ts s newrules
             a <- nts,
             b `elem` triviallyReachableFrom [a] rules]
 
+{-|
+ - Transforms symbol based on the algoritm 4.7 TIN.
+ -
+ - Nonterminals are not transformed but are added
+ - for convinence.
+ -
+ - Terminals are transformed like this:
+ -     a => a'
+ -     Plus rules a' -> a are added too.
+ -}
 transformSymbol :: String -> (String, Maybe Rule)
 transformSymbol a
     | isTerminal a = (nsym, Just (Rule nsym [a]))
     | otherwise = (a, Nothing)
     where nsym = a++"'"
 
+{-|
+ - Transforms rules baed on the algorithm 4.7 from TIN.
+ - Each case is docummented separately.
+ -}
 transformRule :: Rule -> ([Rule], [Nonterminal])
+
+{-|
+ - Algorithm expects nontrivial rules. if rule
+ - A -> a exists than a is terminal and this
+ - comforts to Chomsky Form.
+ -}
 transformRule rule@(Rule _ [_]) = ([rule], [])
 
+{-|
+ - All rules A -> XY
+ - if XY are all nonterms then it comforts Chomsky Form.
+ - if either X or Y or both are terms then those should be transformed.
+ -}
 transformRule rule@(Rule n alpha@[_, _])
     | all isNonterminal alpha = ([rule], [])
-    | otherwise = ([r | (_, Just r) <- map transformSymbol alpha] -- rules a'->a
-                    ++ [Rule n transalpha], -- New rule S -> a'A|Aa'|a'a'
-                  nub transalpha) -- After transformation alpha will be just nonterms
+    | otherwise =
+        (rulesCreatedByTransformation -- rules a'->a
+            ++ [Rule n transalpha] -- New rule S -> a'A|Aa'|a'a'
+        , nub transalpha) -- After transformation alpha will be just nonterms
     where transalpha = [s | (s, _) <- map transformSymbol alpha]
+          rulesCreatedByTransformation = [r | (_, Just r) <- map transformSymbol alpha]
 
+{-|
+ - All rules that consist of more than 3 symbols on right side must be recursively
+ - transformed.
+ - X -> XaYZ
+ - ---------
+ - X -> X<aYZ>
+ - <aYZ> -> a'<YZ>
+ - a' -> a
+ - <YZ> -> YZ
+ -}
 transformRule (Rule n (f:alpha')) = (Rule n [h', newNt]:rules ++ hr', [h',newNt] ++ nts)
         where (rules, nts) = transformRule (Rule newNt alpha')
               newNt = "<"++intercalate "" alpha'++">"
@@ -124,6 +172,12 @@ transformRule (Rule n (f:alpha')) = (Rule n [h', newNt]:rules ++ hr', [h',newNt]
                             (h, Just r) -> (h, [r])
                             _ -> (f, [])
 
+{-|
+ - Transforms CFG on input to CFG in Chomsky form.
+ - Grammar on input MUST NOT contain any trivial rules.
+ -
+ - Transformation is based on algorithm 4.7 in TIN.
+ -}
 cfgChomskyTransform :: CFGrammar -> CFGrammar
 cfgChomskyTransform (CFG nts ts s rules) =
         CFG ( nts `union` newnts) ts s newrules
@@ -131,6 +185,9 @@ cfgChomskyTransform (CFG nts ts s rules) =
           newrules = nub [nr | (r, _) <- newtransforms, nr <- r]
           newnts = nub [nn | (_, n) <- newtransforms, nn <- n]
 
+{-|
+ - Provides action with CFG on input based on input flag.
+ -}
 provideAction :: Flag -> CFGrammar -> IO()
 provideAction flag
     | flag == Internal = putStr . show
