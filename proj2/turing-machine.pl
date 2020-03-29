@@ -1,6 +1,4 @@
-:- initialization(main, main).
-
-main(_) :-
+main :-
     prompt(_, ''),
     catch(
         catch((

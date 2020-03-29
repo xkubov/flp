@@ -5,6 +5,7 @@
 OUT=flp20-log
 SRC=turing-machine.pl
 CC=swipl
+FLAGS=--goal=main
 
 $(OUT): $(SRC)
 	$(CC) $(FLAGS) -o $(OUT) -c $(SRC)
