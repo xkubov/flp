@@ -1,6 +1,8 @@
 :- initialization(main, main).
 
-main(_) :- catch(
+main(_) :-
+    prompt(_, ''),
+    catch(
         catch((
             read_lines(X), parse_input(X, Tape), assert(pos(0)), assert(end_configuration([])), simulate_machine('S', Tape)
         ), error(MSG), (
