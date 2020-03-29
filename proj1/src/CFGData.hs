@@ -5,16 +5,16 @@ module CFGData where
 import Data.Char
 import Data.List
 
-type Nonterminal = Char
-type Terminal = Char
-type Sentence = String
+type Nonterminal = String
+type Terminal = String
+type Sentence = [String]
 data Rule = Rule Nonterminal Sentence deriving (Eq)
 
 instance Show Rule where
-    show (Rule nt st) = intercalate "->" [[nt], st]
- 
+    show (Rule nt st) = intercalate "->" [nt, intercalate "" st]
+
 {-|
- - Internal representation of a context-gree grammar.
+ - Internal representation of a cont-gree grammar.
  -}
 data CFGrammar = CFG {
     nonterminals :: [Nonterminal], -- ^ Set of non-terminals.
@@ -25,44 +25,19 @@ data CFGrammar = CFG {
 
 instance Show CFGrammar where
     show CFG{..} = unlines $
-        [intercalate "," $ map (: []) nonterminals,
-         intercalate "," $ map (: []) terminals,
-         [initS]
+        [intercalate "," nonterminals,
+         intercalate "," terminals,
+         initS
         ] ++ map show rules
 
-type ExtNonterminal = String
-type ExtTerminal = String
-type ExtSentence = [String]
-data ExtRule = ExtRule ExtNonterminal ExtSentence deriving (Eq)
+isTerm :: Char -> Bool
+isTerm x = isLower x && x `elem` ['a'..'z']
 
-instance Show ExtRule where
-    show (ExtRule nt st) = intercalate "->" [nt, intercalate "" st]
+isTerminal :: String -> Bool
+isTerminal x = length x == 1 && all isTerm x
 
-{-|
- - Internal representation of a context-gree grammar.
- -}
-data ExtCFGrammar = ExtCFG {
-    extNonterminals :: [ExtNonterminal], -- ^ Set of non-terminals.
-    extTerminals :: [ExtTerminal],       -- ^ Set of terminals.
-    extInitS :: ExtNonterminal,          -- ^ Initial non-terminal.
-    extRules :: [ExtRule]                -- ^ Set of rules.
-} deriving (Eq)
+isNonterm :: Char -> Bool
+isNonterm x = isUpper x && x `elem` ['A'..'Z']
 
-instance Show ExtCFGrammar where
-    show ExtCFG{..} = unlines $
-        [intercalate "," extNonterminals,
-         intercalate "," extTerminals,
-         extInitS
-        ] ++ map show extRules
-
-isTerminal :: Char -> Bool
-isTerminal x = isLower x && x `elem` ['a'..'z']
-
-isExtTerminal :: String -> Bool
-isExtTerminal x = length x == 1 && all isTerminal x
-
-isNonterminal :: Char -> Bool
-isNonterminal x = isUpper x && x `elem` ['A'..'Z']
-
-isExtNonterminal :: String -> Bool
-isExtNonterminal = not . isExtTerminal
+isNonterminal :: String -> Bool
+isNonterminal = not . isTerminal

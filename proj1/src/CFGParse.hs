@@ -26,19 +26,21 @@ nontermSetParser :: Parser [Nonterminal]
 nontermSetParser = sepBy1 nontermParser comma
 
 nontermParser :: Parser Nonterminal
-nontermParser = satisfy isNonterminal
+nontermParser = many1 $ satisfy isNonterm
 
 termSetParser :: Parser [Terminal]
 termSetParser = sepBy1 termParser comma
 
 termParser :: Parser Terminal
-termParser = satisfy isTerminal
+termParser = many1 $ satisfy isTerm
 
 termNontermParser :: Parser Char
-termNontermParser = choice [termParser, nontermParser]
+termNontermParser = choice [satisfy isNonterm, satisfy isTerm]
 
 sentenceParser :: Parser Sentence 
-sentenceParser = many1 termNontermParser
+sentenceParser = do
+    strings <- many1 termNontermParser
+    return $ map (:[])strings
 
 ruleSetParser :: Parser [Rule]
 ruleSetParser = endBy ruleParser newline
@@ -55,17 +57,19 @@ validate :: CFGrammar -> Either String CFGrammar
 validate cfg@CFG{..}
     | allOK = Right cfg
     | not initialInNonterms = Left (
-            "nonterminal "++[initS]++" is not member of ["
-                ++ intercalate "," (map (: []) nonterminals) ++ "]")
+            "nonterminal "++initS++" is not member of ["
+                ++ intercalate "," nonterminals ++ "]")
     | not disjointTermsNonterms = Left (
             "sets of terms and nonterms are not disjoint. Common symbols: "
                 ++ show (terminals `union` nonterminals))
     | not validRules = Left "specified CFG has invalid rules"
+    | not meetInputTermsNonterms = Left "terminals or nonterminals do not meet input criteria from assignment"
     | otherwise = Left "invalid CFG"
   where
-    allOK = initialInNonterms && disjointTermsNonterms && validRules
+    allOK = initialInNonterms && meetInputTermsNonterms && disjointTermsNonterms && validRules
     initialInNonterms = initS `elem` nonterminals
     disjointTermsNonterms = null $ terminals `intersect` nonterminals
     validRules = and [nt `elem` nonterminals | Rule nt _ <- rules]
         && and [x `elem` (terminals `union` nonterminals) | Rule _ alpha <- rules, x <- alpha]
+    meetInputTermsNonterms = and [length x == 1 | x <- terminals, x <- nonterminals]
 

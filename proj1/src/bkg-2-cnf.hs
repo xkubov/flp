@@ -80,7 +80,7 @@ parseArgs argv = case getOpt Permute flags argv of
  -
  - Exapmle of trivial rules is: A->B
  -}
-triviallyReachableFrom :: String -> [Rule] -> String
+triviallyReachableFrom :: [String] -> [Rule] -> [String]
 triviallyReachableFrom closure rules
     | closure == closureUntilNow = closure
     | otherwise                  = triviallyReachableFrom closureUntilNow rules
@@ -101,33 +101,33 @@ cfgReduceTrivial (CFG nts ts s rules) = CFG nts ts s newrules
             a <- nts,
             b `elem` triviallyReachableFrom [a] rules]
 
-transformSymbol :: String -> (String, Maybe ExtRule)
+transformSymbol :: String -> (String, Maybe Rule)
 transformSymbol a
-    | isExtTerminal a = (nsym, Just (ExtRule nsym [a]))
+    | isTerminal a = (nsym, Just (Rule nsym [a]))
     | otherwise = (a, Nothing)
     where nsym = a++"'"
 
-transformRule :: ExtRule -> ([ExtRule], [ExtNonterminal])
-transformRule rule@(ExtRule _ [_]) = ([rule], [])
+transformRule :: Rule -> ([Rule], [Nonterminal])
+transformRule rule@(Rule _ [_]) = ([rule], [])
 
-transformRule rule@(ExtRule n alpha@[_, _])
-    | all isExtNonterminal alpha = ([rule], [])
+transformRule rule@(Rule n alpha@[_, _])
+    | all isNonterminal alpha = ([rule], [])
     | otherwise = ([r | (_, Just r) <- map transformSymbol alpha] -- rules a'->a
-                    ++ [ExtRule n transalpha], -- New rule S -> a'A|Aa'|a'a'
+                    ++ [Rule n transalpha], -- New rule S -> a'A|Aa'|a'a'
                   nub transalpha) -- After transformation alpha will be just nonterms
     where transalpha = [s | (s, _) <- map transformSymbol alpha]
 
-transformRule (ExtRule n (f:alpha')) = (ExtRule n [h', newNt]:rules ++ hr', [h',newNt] ++ nts)
-        where (rules, nts) = transformRule (ExtRule newNt alpha')
+transformRule (Rule n (f:alpha')) = (Rule n [h', newNt]:rules ++ hr', [h',newNt] ++ nts)
+        where (rules, nts) = transformRule (Rule newNt alpha')
               newNt = "<"++intercalate "" alpha'++">"
               (h', hr') = case transformSymbol f of
                             (h, Just r) -> (h, [r])
                             _ -> (f, [])
 
-cfgChomskyTransform :: CFGrammar -> ExtCFGrammar
+cfgChomskyTransform :: CFGrammar -> CFGrammar
 cfgChomskyTransform (CFG nts ts s rules) =
-        ExtCFG (map (:[]) nts `union` newnts) (map (:[]) ts) [s] newrules
-    where newtransforms = [transformRule $ ExtRule [n] (map (:[]) alpha) | Rule n alpha <- rules]
+        CFG ( nts `union` newnts) ts s newrules
+    where newtransforms = [transformRule r | r <- rules]
           newrules = nub [nr | (r, _) <- newtransforms, nr <- r]
           newnts = nub [nn | (_, n) <- newtransforms, nn <- n]
 
