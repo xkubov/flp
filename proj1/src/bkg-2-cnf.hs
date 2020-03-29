@@ -166,11 +166,11 @@ transformRule rule@(Rule n alpha@[_, _])
  - <YZ> -> YZ
  -}
 transformRule (Rule n (f:alpha')) = (Rule n [h', newNt]:rules ++ hr', [h',newNt] ++ nts)
-        where (rules, nts) = transformRule (Rule newNt alpha')
-              newNt = "<"++intercalate "" alpha'++">"
-              (h', hr') = case transformSymbol f of
-                            (h, Just r) -> (h, [r])
-                            _ -> (f, [])
+    where (rules, nts) = transformRule (Rule newNt alpha') -- recursively transform nnew rule.
+          newNt = "<"++intercalate "" alpha'++">" -- new nonterminal from sentence: abc -> <ABC>
+          (h', hr') = case transformSymbol f of
+                        (h, Just r) -> (h, [r])
+                        _ -> (f, [])
 
 {-|
  - Transforms CFG on input to CFG in Chomsky form.
