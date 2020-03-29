@@ -23,6 +23,61 @@ main :-
 ).
 
 /**
+ * Simulates TM on tape specified as parameter. Simulation ends if state F is reached.
+ */
+simulate_machine('F', Tape) :-
+    % last configuration should be on output too.
+    format_configuration('F',Tape,Cfg), add_to_end_configuration(Cfg),
+    % exits peacefully.
+    tm_end_configuration(X), print_lines(X), halt(0).
+simulate_machine(Q,Tape) :-
+    % add configuration to path just in case.
+    format_configuration(Q,Tape,Cfg), add_to_end_configuration(Cfg),
+    % get character under head
+    get_head(Tape, Head),
+    % find all actions that can be done in current state
+    % with current head. Next states are not important that much
+    % righ now.
+    bagof(Action, NQ^transition(Q, Head, NQ, Action), Actions),
+    % try all actions that are available and see if one leads to an end.
+    try_action_paths(Q, Tape, Actions).
+
+/**
+ * Tries more paths of actions specified on parameter. For each action tries
+ * more possible states. If no action is possible throws exception -> abnormal termination.
+ */
+try_action_paths(_, _, []) :- throw(abnormal_termination('no action to do')).
+try_action_paths(Q, Tape, [Action|_]) :-
+    % Get head to find what all states are available for current action.
+    get_head(Tape, Head),
+    % Get all available new states.
+    bagof(NQ, transition(Q, Head, NQ, Action), NQs),
+    % Try all found available new states.
+    try_state_paths(Tape, Action, NQs), !.
+% If previous action fails to find end, next action will be tried.
+try_action_paths(Q, Tape, [_|OtherPaths]) :- try_action_paths(Q, Tape, OtherPaths).
+
+/**
+ * Tries path of performation with specified action and
+ * possible states. If success is not possible returns false.
+ */
+try_state_paths(_, _, []) :- false.
+try_state_paths(Tape, Action, [State|_]) :-
+    % Save position of head in case of failure.
+    tm_head_pos(SavePos),
+    % Save configuraion of turing machine in case next path fails.
+    tm_end_configuration(Save),
+    catch((
+        % Alter tape.
+        do_action(Tape, Action, NewTape),
+        % Do simulation wih new state nad new tape.
+        simulate_machine(State, NewTape)
+    % If simulation fails reset head position and previous end configuration.
+    ), abnormal_termination(_), (reset_position(SavePos), reset_tm_end_configuration(Save), false)), !.
+% If setting state does not lead to an end this will make sure that next state is tried.
+try_state_paths(Tape, Action, [_|OtherPaths]) :- try_state_paths(Tape, Action, OtherPaths).
+
+/**
  * Substitutes symbol on Tape on specified posistion.
  * Provides new tape as last parameter.
  */
@@ -36,6 +91,7 @@ substitute([H|Tape], Pos, C, [H|NTape]) :- dec(Pos, NPos), substitute(Tape, NPos
 move_head(D, Tape) :- tm_head_pos(P),
     (D == 'L' -> dec(P, NP) ; inc(P, NP)),
     (can_move(NP, Tape) -> (
+        % Move head to new position.
         retract(tm_head_pos(P)), assert(tm_head_pos(NP))
     ) ; (
         throw(abnormal_termination('cannot move head'))
@@ -90,7 +146,7 @@ reset_tm_end_configuration(NewConfig) :- tm_end_configuration(X), retract(tm_end
 /**
  * Adds configuration to the end configuration of TM.
  */
-add_to_tm_end_configuration(X) :- tm_end_configuration(EndConfig), reset_tm_end_configuration([X|EndConfig]).
+add_to_end_configuration(X) :- tm_end_configuration(EndConfig), reset_tm_end_configuration([X|EndConfig]).
 
 /**
  * Preforms action on tape specified by parameter.
@@ -108,41 +164,6 @@ do_action(Tape, Action, NewTape) :- (
  */
 print_lines([]).
 print_lines([H|T]) :- print_lines(T), write(H).
-
-/**
- * Tries path of performation with specified action and
- * possible states. If success is not possible returns false.
- */
-try_state_paths(_, _, []) :- false.
-try_state_paths(Tape, Action, [State|_]) :-
-    tm_head_pos(SavePos),
-    tm_end_configuration(Save),
-    catch((
-        do_action(Tape, Action, NewTape),
-        simulate_machine(State, NewTape)
-    ), abnormal_termination(_), (reset_position(SavePos), reset_tm_end_configuration(Save), false)), !.
-try_state_paths(Tape, Action, [_|OtherPaths]) :- try_state_paths(Tape, Action, OtherPaths).
-
-/**
- * Tries more paths of actions specified on parameter. For each action tries
- * more possible states. If no action is possible throws exception -> abnormal termination.
- */
-try_action_paths(_, _, []) :- throw(abnormal_termination('no action to do')).
-try_action_paths(Q, Tape, [Action|_]) :-
-    get_head(Tape, Head),
-    bagof(NQ, transition(Q, Head, NQ, Action), NQs),
-    try_state_paths(Tape, Action, NQs), !.
-try_action_paths(Q, Tape, [_|OtherPaths]) :- try_action_paths(Q, Tape, OtherPaths).
-
-/**
- * Simulates TM on tape specified as parameter. Simulation ends if state F is reached.
- */
-simulate_machine('F', Tape) :-
-    format_configuration('F',Tape,Cfg), add_to_tm_end_configuration(Cfg),
-    tm_end_configuration(X), print_lines(X), halt(0).
-simulate_machine(Q,Tape) :- get_head(Tape, Head), format_configuration(Q,Tape,Cfg), add_to_tm_end_configuration(Cfg),
-    bagof(Ac, NQ^transition(Q, Head, NQ, Ac), Actions),
-    try_action_paths(Q, Tape, Actions).
 
 /**
  * Parses input lines.
