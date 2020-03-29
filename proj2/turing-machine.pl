@@ -7,7 +7,7 @@ main(_) :- catch((
     )
 ).
 
-simulate_machine(_,_).
+simulate_machine(_,_) :- transition('S', 'a', 'B', 'a').
 
 parse_input([], _) :- throw(error('no input provided')).
 parse_input([H], Tape) :- parse_tape(H, Tape), !.
@@ -22,7 +22,7 @@ is_state(Q) :- char_type(Q, alpha), char_type(Q, upper).
 is_tape(C) :- char_type(C, alpha), char_type(C, lower).
 is_tape_or_LR(C) :- (is_tape(C); C == 'L'; C == 'R').
 
-parse_rule([Q,_,T,_,NQ,_,NT]) :- is_state(Q), is_state(NQ), is_tape(T), is_tape_or_LR(NT), !.
+parse_rule([Q,_,T,_,NQ,_,NT]) :- is_state(Q), is_state(NQ), is_tape(T), is_tape_or_LR(NT), assert(transition(Q, T, NQ, NT)), !.
 parse_rule(_) :- throw(error('Invalud rule')).
 
 /**
