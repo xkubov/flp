@@ -11,4 +11,4 @@ $(OUT): $(SRC)
 	$(CC) $(FLAGS) -o $(OUT) -c $(SRC)
 
 clean:
-	rm $(OUT)
+	@rm -f $(OUT)
