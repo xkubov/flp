@@ -7,6 +7,22 @@ main(_) :- catch((
     )
 ).
 
+substitute([_|Tape], 0, C, [C|Tape]).
+substitute([H|Tape], Pos, C, [H|NTape]) :- substitute(Tape, Pos-1, C, NTape).
+
+can_move(-1, _) :- false.
+can_move(0, [_|_]).
+can_move(Pos, [_|Tape]) :- can_move(Pos-1, Tape).
+
+move_head(D, Tape) :- pos(P),
+    (D == 'L' -> NP = P-1 ; NP = P+1),
+    (can_move(NP, Tape) -> (
+        retract(pos(P)), assert(pos(NP))
+    ) ; (
+        throw(abnormal_termination)
+    )
+).
+
 simulate_machine(_,_) :- transition('S', 'a', 'B', 'a').
 
 parse_input([], _) :- throw(error('no input provided')).
