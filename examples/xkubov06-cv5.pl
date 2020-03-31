@@ -121,7 +121,7 @@ g_move(X1:Y1, X2:Y2) :- X2 is X1 + 1, Y2 is Y1 + 1, g_test(X2:Y2).
  * Finds all possible solutions starting from X:Y
  */
 g_one(X:Y, Len, L, R) :- member(X:Y, L) -> false ; (
-    length([X:Y|L], Len), % check if we have solution of wanted length
+    length([X:Y|L], Len), % cut finding if we have solution of wanted length
     reverse([X:Y|L], R), ! % path will be in reverse.
 ).
 g_one(X:Y, Len, L, R) :- member(X:Y, L) -> false ; (
