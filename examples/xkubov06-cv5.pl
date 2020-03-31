@@ -21,9 +21,20 @@ addOneToAll(E, [L|LS], [[E|L]|T]) :- addOneToAll(E, LS, T).
 
 /**
  * Homework #2: robots
+ *
+ * Returns true if a robot occupies the position P
+ * or if hole is present on the postion P.
  */
 obsazeno(P) :- robot(_, P); dira(P).
 
+/**
+ * Creates new robot with id I on position P.
+ *
+ * Returns false if a robot or hole is already present on the position.
+ * If robot already exists on different position retracts it
+ * from that position and moves to the new.  Otherwise creates
+ * robot and returns true.
+ */
 vytvor(I, P) :- obsazeno(P) -> false ; (
     robot(I, PE) -> (
         retract(robot(I,PE)),
@@ -33,10 +44,17 @@ vytvor(I, P) :- obsazeno(P) -> false ; (
     )
 ).
 
+/**
+ * Creates new hole. If a hole or robot is positioned on the position P
+ * returns false.
+ */
 vytvor(P) :- obsazeno(P) -> false ; (
     assert(dira(P))
 ).
 
+/**
+ * Removes either robot or hole from the position P.
+ */
 odstran(P) :- obsazeno(P) -> (
     robot(I, P) -> (
         retract(robot(I,P))
@@ -45,13 +63,26 @@ odstran(P) :- obsazeno(P) -> (
     )
 ); true.
 
+/**
+ * Returns all positions that are occupied by either robots
+ * or holes.
+ */
 obsazene_pozice(X) :- bagof(P, obsazeno(P), X).
+
+/**
+ * Returns all IDs of robots.
+ */
 obsazene_roboty(X) :- bagof(ID, P^robot(ID, P), X).
 
 inkrementuj(X,Y) :- Y is X+1.
 dekrementuj(X,Y) :- Y is X-1.
 doleva(I) :- pohni(I, dekrementuj).
 doprava(I) :- pohni(I, inkrementuj).
+
+/**
+ * Moves robot. If hole is on a position where robot is
+ * going to be moved then robot is destroyed.
+ */
 pohni(I, Operace) :- (
     robot(I, Pos) -> (
         Op =.. [Operace, Pos, NPos], call(Op), (
@@ -63,8 +94,15 @@ pohni(I, Operace) :- (
     )
 ).
 
+/**
+ * Destroys all the robots.
+ */
 armageddon :- forall(robot(_, P), vybuch(P)).
 vybuch(P) :- odstran(P), vytvor(P).
+
+/**
+ * Homework #3: gestures brute force.
+ */
 
 g_size(3).
 
