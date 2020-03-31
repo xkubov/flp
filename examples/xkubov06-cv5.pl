@@ -117,16 +117,26 @@ g_move(X1:Y1, X2:Y2) :- X2 is X1 + 1, Y2 is Y1 - 1, g_test(X2:Y2).
 g_move(X1:Y1, X2:Y2) :- X2 is X1 + 1, Y2 is Y1 + 0, g_test(X2:Y2).
 g_move(X1:Y1, X2:Y2) :- X2 is X1 + 1, Y2 is Y1 + 1, g_test(X2:Y2).
 
+/**
+ * Finds all possible solutions starting from X:Y
+ */
 g_one(X:Y, Len, L, R) :- member(X:Y, L) -> false ; (
-    length([X:Y|L], SolLen),
-    SolLen == Len,
-    reverse([X:Y|L], R), !
+    length([X:Y|L], SolLen), % check if we have solution of wanted length
+    SolLen == Len, % if yes cut this branch.
+    reverse([X:Y|L], R), ! % path will be in reverse.
 ).
 g_one(X:Y, Len, L, R) :- member(X:Y, L) -> false ; (
-    g_move(X:Y, XN:YN),
-    g_one(XN:YN, Len, [X:Y|L], R)
+    g_move(X:Y, XN:YN), % move to all directions
+    g_one(XN:YN, Len, [X:Y|L], R) % check solution in all directions
 ).
 
+/**
+ * Finds all the soltuion of the lenght Len.
+ */
 g_all(R, Len) :- g_size(S), between(0,S,X), between(0,S,Y), g_one(X:Y, Len, [], R).
 
+/**
+ * Find all possible solutions. There are no solutions above size of g_size*g_size.
+ * (g_size*g_size) solution covers all the connected points.
+ */
 g_allLength(R) :- g_size(S), Max is S * S, between(1, Max, Len), g_all(R, Len).
