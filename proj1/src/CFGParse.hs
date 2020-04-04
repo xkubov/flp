@@ -102,8 +102,6 @@ ruleParser = Rule <$> nontermParser <* string "->" <*> sentenceParser
 comma :: Parser Char
 comma = char ','
 
--- TODO: check loops
--- TODO: check retarded symbols
 {-|
  - Semantic analysis of the CFG parsing.
  -}
