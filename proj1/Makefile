@@ -11,7 +11,7 @@ HC = ghc
 ## Source dir
 SRC_DIR=src
 
-SRC=$(SRC_DIR)/bkg-2-cnf.hs
+SRC=$(SRC_DIR)/Main.hs
 
 $(PROJ): $(SRC)
 	$(HC) -i$(SRC_DIR) $(SRC) -o $(PROJ)
