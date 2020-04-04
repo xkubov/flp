@@ -2,6 +2,7 @@
 Module      : CFGData
 Description : Defines Context Free Grammar data type.
 Author      : Peter Kubov
+Login       : xkubov06
 Project     : Functional project: bkg-2-cnf
 License     : GPL-3
 Year        : 2020

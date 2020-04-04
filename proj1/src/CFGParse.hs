@@ -2,6 +2,7 @@
 Module      : CFGParse
 Description : Parser of CFG
 Author      : Peter Kubov
+Login       : xkubov06
 Project     : Functional project: bkg-2-cnf
 License     : GPL-3
 Year        : 2020
