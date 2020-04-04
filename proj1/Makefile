@@ -1,6 +1,7 @@
-#
-# Author: Peter Kubov
-#
+# Author : Peter Kubov
+# Project: Functional project: bkg-2-cnf
+# License: GPL-3
+# Year   : 2020
 
 ## Output of the project.
 PROJ = bkg-2-cnf
