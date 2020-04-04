@@ -25,6 +25,8 @@ SRC_FILES = src/Main.hs \
 DOC_FILES = doc/README.md \
 	    doc/test-description.txt
 
+TEST_FILES = test/test.cfg
+
 FILES=Makefile     \
       $(SRC_FILES) \
       $(DOC_FILES) \
