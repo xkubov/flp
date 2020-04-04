@@ -18,7 +18,8 @@ ZIP_NAME=flp-fun-xkubov06.zip
 
 SRC=$(SRC_DIR)/Main.hs
 
-SRC_FILES = src/Main.hs \
+SRC_FILES = src/Main.hs     \
+	    src/CFGAlgs.hs  \
 	    src/CFGParse.hs \
 	    src/CFGData.hs
 
