@@ -38,7 +38,7 @@ $(PROJ): $(SRC)
 
 .PHONY:
 clean:
-	@rm $(PROJ) $(SRC_DIR)/*.o $(SRC_DIR)/*.hi
+	@rm -f $(PROJ) $(SRC_DIR)/*.o $(SRC_DIR)/*.hi *.zip
 
 .PHONY:
 zip:
