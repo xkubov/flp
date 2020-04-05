@@ -1,0 +1,11 @@
+S,Q,a',<SbS>,<bS>,b',<SaS>,<aS>
+a,b
+S
+S->a'<SbS>
+<SbS>->S<bS>
+b'->b
+<bS>->b'S
+a'->a
+S->b'<SaS>
+<SaS>->S<aS>
+<aS>->a'S

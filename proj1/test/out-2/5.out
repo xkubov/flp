@@ -1,0 +1,17 @@
+S,A,B,C,a',<aaaaB>,<aaaB>,<aaB>,<aB>,<bbbbb>,b',<bbbb>,<bbb>,<bb>
+a,b
+S
+S->a'<aaaaB>
+<aaaaB>->a'<aaaB>
+<aaaB>->a'<aaB>
+<aaB>->a'<aB>
+a'->a
+<aB>->a'B
+A->a'<aaaaB>
+B->B<bbbbb>
+<bbbbb>->b'<bbbb>
+<bbbb>->b'<bbb>
+<bbb>->b'<bb>
+b'->b
+<bb>->b'b'
+B->b'<bbbb>
