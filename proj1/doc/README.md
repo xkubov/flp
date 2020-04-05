@@ -20,9 +20,8 @@ Usage: bkg-2-cnf <options> [input]
 ```
 
 If no `[input]` file is provided grammar is read from the STDIN until `EOF` is read.
-The grammar on input must be in valid form. The accepted grammar is only the grammar
-that does not contain unnecessary symbols, should not contain loops and epsilon rules.
-If grammar is not in such form it is rejected.
+The grammar on input must be in valid form. See https://en.wikipedia.org/wiki/Context-free_grammar
+for mor information about CFG.
 
 ## Included implementation
 
