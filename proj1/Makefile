@@ -10,31 +10,42 @@ PROJ = bkg-2-cnf
 ## Compiler to be used.
 HC = ghc
 
-## Source dir
+## Important dirs
 SRC_DIR=src
+DOC_DIR=doc
+TEST_DIR=test
 
 ## Zip name
 ZIP_NAME=flp-fun-xkubov06.zip
 
+## Main compilation file
 SRC=$(SRC_DIR)/Main.hs
 
-SRC_FILES = src/Main.hs     \
-	    src/CFGAlgs.hs  \
-	    src/CFGParse.hs \
-	    src/CFGData.hs
+SRC_FILES = $(SRC_DIR)/Main.hs     \
+	    $(SRC_DIR)/CFGAlgs.hs  \
+	    $(SRC_DIR)/CFGParse.hs \
+	    $(SRC_DIR)/CFGData.hs
 
-DOC_FILES = doc/README.md \
-	    doc/test-description.txt
+DOC_FILES = $(DOC_DIR)/README.md \
+	    $(DOC_DIR)/test-description.txt
 
-TEST_FILES = test/test.cfg
+TEST_FILES = test/in   \
+	     test/out* \
+	     test/test.sh
 
 FILES=Makefile     \
       $(SRC_FILES) \
       $(DOC_FILES) \
       $(TEST_FILES)
 
-$(PROJ): $(SRC)
+$(PROJ): $(SRC_FILES)
 	$(HC) -i$(SRC_DIR) $(SRC) -o $(PROJ)
+
+.PHONY:
+tests: $(PROJ)
+	@cp $(PROJ) $(TEST_DIR)
+	@cd $(TEST_DIR) && bash test.sh
+	@rm $(TEST_DIR)/$(PROJ)
 
 .PHONY:
 clean:
@@ -42,4 +53,4 @@ clean:
 
 .PHONY:
 zip:
-	zip $(ZIP_NAME) $(FILES)
+	zip -r $(ZIP_NAME) $(FILES)
