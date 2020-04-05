@@ -1,0 +1,18 @@
+Description of tests
+
+Part of the project is testing suit that was created for automated
+testing during the project developement.
+
+Various aspects of the implementation is tested mainly the correcness
+of output of each option -i -1 and -2.
+
+The test can be run with either command `make` by running:
+
+$ make tests
+
+Or by running bash sript included in test directory manually.
+
+$ bash ./test.sh # Make sure that the bkg-2-cnf file is in the directory.
+
+out* directory contains expected output of each test.
+If the expected output file is empty, failure is expected.
