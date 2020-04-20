@@ -45,6 +45,7 @@ simulate_machine(Q,Tape) :-
 /**
  * Tries more paths of actions specified on parameter. For each action tries
  * more possible states. If no action is possible throws exception -> abnormal termination.
+ * TODO: perhaps should do less throwing more findAll.
  */
 try_action_paths(_, _, []) :- throw(abnormal_termination('no action to do')).
 try_action_paths(Q, Tape, [Action|_]) :-
@@ -100,6 +101,11 @@ move_head(D, Tape) :- tm_head_pos(P),
 
 /**
  * Checks wheter position stays on tape.
+ * TODO:
+ *  - we should be able to move head on beyond last position.
+ *  - Turing machine should fail on access of element beyond.
+ *
+ *  test02
  */
 can_move(-1, _) :- false.
 can_move(0, [_|_]).
