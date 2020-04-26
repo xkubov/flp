@@ -3,6 +3,19 @@
 Goal of the project is to implement simulator of non-deterministic Turing machine.
 Implementation takes definition of a Turing machine on standard input.
 
+# Usage
+
+When run `flp20-log -h` from command line you will be provided with following
+help screen:
+
+```
+usage: flp20-log <option>
+<option>:
+    -t prints execution time in miliseconds at the end of output.
+    -h prints this help.
+
+```
+
 Assignment specified following format for input:
 
 ```
@@ -27,18 +40,11 @@ And tape:
 
 Each state must satisfy regex `[A-Z]` and each symbol must comfort regex `[a-z]`.
 
-# Usage
+# Running
 
-When run `flp20-log -h` from command line you will be provided with following
-help screen:
-
-```
-usage: flp20-log <option>
-<option>:
-    -t prints execution time in miliseconds at the end of output.
-    -h prints this help.
-
-```
+If simulation of turing machine ends by transition into final state 'F' then configuration
+that leads to this state is printed on `stdout` with exit code 0. If no path leads to final
+state 'F' then turing machine ends abnormaly - nothing is printed on `stdout` and exit code is 0.
 
 # About Implementation
 
