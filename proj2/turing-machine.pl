@@ -21,7 +21,7 @@ main :-
         ), error(MSG), (
             format('error: ~w\n', [MSG]), halt(1)
         )
-    ), abnormal_termination(MSG), halt(0)
+    ), abnormal_termination(_), halt(0)
 ).
 
 /**
@@ -37,9 +37,6 @@ simulate_machine(StartN,Tape) :-
 	ActionPaths
     ),
     try_action_paths(ActionPaths).
-
-append([], X, X).
-append([X | Y], Z, [X | W]) :- append(Y, Z, W).
 
 /**
  * Implements BFS for finding the most suitable action path.
@@ -59,7 +56,7 @@ try_action_paths([action_path(transition(_, _, Q, Action), Pos, Tape, CFG)| AP])
 		append(AP, ActionPaths, NextAP),
 		try_action_paths(NextAP)
 	), abnormal_termination(_), (
-		% Try next BFS
+		% Try next action path
 		try_action_paths(AP)
 	)).
 
@@ -85,9 +82,10 @@ move_head(P, D, Tape, NP) :-
 ).
 
 /**
- * Checks wheter position stays on tape.
+ * Checks whether position stays on tape.
+ *
+ * Position must be pozitive integer.
  */
-can_move(-1, _) :- false.
 can_move(0, []).
 can_move(0, [_|_]).
 can_move(Pos, [_|Tape]) :- dec(Pos, NPos), can_move(NPos, Tape).
@@ -196,3 +194,13 @@ read_lines(Ls) :- prompt(_, ''), read_line(L,C), (
 
 is_eof_eol(C) :- C == end_of_file.
 is_eof_eol(C) :- char_code(C, Code), Code == 10.
+
+/**
+ * Helper append predicate.
+ *
+ * Takes two lists and append them into single list:
+ *
+ * append([1,2,3], [4,5], Res) -> Res = [1,2,3,4,5]
+ */
+append([], X, X).
+append([X | Y], Z, [X | W]) :- append(Y, Z, W).
