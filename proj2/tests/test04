@@ -1,0 +1,7 @@
+#
+# Turing machine that fails by succeed.
+# This will result in false because there
+# is no representation of blank symbols.
+#
+S a F L
+aba

@@ -1,3 +1,7 @@
+#
+# Turing machine that accepts
+# only input with suffix 'aba'.
+#
 S b S R
 S c S R
 S a A R

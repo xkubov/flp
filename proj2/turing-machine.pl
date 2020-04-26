@@ -8,6 +8,11 @@
  * @date 21. 03. 2020
  */
 
+/**
+ * Declatation of dynamic predicate transition.
+ */
+:- dynamic transition/4.
+
 main :-
     catch(
         catch((
@@ -19,7 +24,7 @@ main :-
         ), error(MSG), (
             format('error: ~w\n', [MSG]), halt(1)
         )
-    ), abnormal_termination(MSG), (write('abnormal termination\n'), halt(0))
+    ), abnormal_termination(MSG), halt(0) % (format('abnormal termination: ~w\n', [MSG]), halt(0))
 ).
 
 /**
@@ -47,7 +52,7 @@ simulate_machine(Q,Tape) :-
  * more possible states. If no action is possible throws exception -> abnormal termination.
  * TODO: perhaps should do less throwing more findAll.
  */
-try_action_paths(_, _, []) :- throw(abnormal_termination('no action to do')).
+try_action_paths(_, _, []) :- throw(abnormal_termination('no path leads to state F')).
 try_action_paths(Q, Tape, [Action|_]) :-
     % Get head to find what all states are available for current action.
     get_head(Tape, Head),
@@ -108,6 +113,7 @@ move_head(D, Tape) :- tm_head_pos(P),
  *  test02
  */
 can_move(-1, _) :- false.
+can_move(0, []).
 can_move(0, [_|_]).
 can_move(Pos, [_|Tape]) :- dec(Pos, NPos), can_move(NPos, Tape).
 
@@ -204,6 +210,7 @@ is_tape_or_LR(C) :- (is_tape(C); C == 'L'; C == 'R').
 /**
  * Parses line as it is a rule of a turing machine.
  */
+parse_rule([H|_]) :- H == '#'.
 parse_rule([Q,_,T,_,NQ,_,NT]) :- is_state(Q), is_state(NQ), is_tape(T), is_tape_or_LR(NT), assert(transition(Q, T, NQ, NT)), !.
 parse_rule(_) :- throw(error('Invalud rule')).
 

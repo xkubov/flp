@@ -12,4 +12,5 @@ A b B R
 B a F R
 B b S R
 B c S R
-aba
+# This should fail.
+aaabbbccccbbbcbcbcabc

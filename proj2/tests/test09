@@ -1,15 +1,19 @@
 #
 # Turing machine that accepts
-# only input with suffix 'aba'.
+# only input containing 'aba'.
 #
 S b S R
 S c S R
-S a A R
+S a S x
+S x A R
 A a A R
 A c S R
-A b B R
+A b A x
+A x B R
 # Turing machine should not fail when moved far right.
-B a F R
+B a B x
+B x F R
 B b S R
 B c S R
-aba
+# Double prefix
+abcaba

@@ -1,6 +1,6 @@
 #
 # Turing machine that accepts
-# only input with suffix 'aba'.
+# only input containing 'aba'.
 #
 S b S R
 S c S R
@@ -12,4 +12,5 @@ A b B R
 B a F R
 B b S R
 B c S R
-aba
+# Double prefix
+abaaba

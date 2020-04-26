@@ -1,0 +1,22 @@
+#
+# Turing machine that accepts
+# only input containing 'aba'.
+#
+S b Q R
+S b S R
+# Turing machine should not cycle.
+# There is a cycle in Q and S.
+Q a S L
+Q b S L
+Q c S L
+S c S R
+S a A R
+A a A R
+A c S R
+A b B R
+# Turing machine should not fail when moved far right.
+B a F R
+B b S R
+B c S R
+# Start with b so that turing machine might cycle.
+bbcaba
