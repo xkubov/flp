@@ -15,6 +15,7 @@ function check_args()
 function run()
 {
 	echo "Testing Turing Machine"
+	echo "==========================="
 	failed=""
 	failed_count=0
 	total=0

@@ -8,10 +8,11 @@ CC=swipl
 FLAGS=--goal=main
 TEST_DIR=tests
 
+.PHONY: tests
+
 $(OUT): $(SRC)
 	$(CC) $(FLAGS) -o $(OUT) -c $(SRC)
 
-.PHONY:
 tests: $(OUT)
 	@cp $(OUT) $(TEST_DIR)
 	@cd $(TEST_DIR) && bash test.sh
