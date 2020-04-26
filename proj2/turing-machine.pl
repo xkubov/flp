@@ -13,16 +13,26 @@
  */
 :- dynamic transition/4.
 
+% Basic functionality -> parse TM, simulate.
 main([]) :- main_control, !.
+
+% Apart from basic functionality measure time.
 main(['-t']) :-
     statistics(runtime,[Start|_]),
     main_control,
     statistics(runtime,[End|_]),
     Runtime is End - Start,
     format('~f\n', [Runtime]), !.
+
+% Print usage of program
 main(['-h']) :- usage, !.
+
+% Only one argument, either -h or -t is expected.
 main(Args) :- format('error: invalid arguments combination: ~w\n', [Args]), usage, halt(1).
 
+/**
+ * Main control flow of the application.
+ */
 main_control :-
     catch(
         catch((
