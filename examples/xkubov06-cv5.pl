@@ -86,7 +86,7 @@ doprava(I) :- pohni(I, inkrementuj).
 pohni(I, Operace) :- (
     robot(I, Pos) -> (
         Op =.. [Operace, Pos, NPos], call(Op), (
-        dira(NPos) -> 
+        dira(NPos) ->
             odstran(Pos)
         ;
             vytvor(I, NPos)

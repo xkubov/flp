@@ -1,6 +1,6 @@
 # BKG-2-CNF
 
-This repository continains implementation of algorithm that takes definition of Context 
+This repository continains implementation of algorithm that takes definition of Context
 free Grammar and transforms it into Chomsky normal form.
 
 This project was created for subject FLP on Faculty of Information Technology VUT in Brno

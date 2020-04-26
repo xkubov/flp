@@ -35,7 +35,7 @@ function run()
 
 	echo "Passed " $((total-failed_count))/$total "tests"
 	if [ ! $failed_count -eq 0 ]; then
-		echo "Failed files:" 
+		echo "Failed files:"
 		for i in $failed; do echo $i; done
 	fi
 	echo "==========================="
