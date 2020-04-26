@@ -13,7 +13,15 @@
  */
 :- dynamic transition/4.
 
-main :-
+main([]) :- main_control, !.
+main(_) :-
+       statistics(runtime,[Start|_]),
+	main_control,
+	statistics(runtime,[End|_]),
+	Runtime is End - Start,
+	format('execution: ~fms\n', [Runtime]), !.
+
+main_control :-
     catch(
         catch((
             read_lines(X), parse_input(X, Tape),
@@ -21,7 +29,7 @@ main :-
         ), error(MSG), (
             format('error: ~w\n', [MSG]), halt(1)
         )
-    ), abnormal_termination(_), halt(0)
+    ), abnormal_termination(_), true
 ).
 
 /**
@@ -46,15 +54,19 @@ try_action_paths([action_path(transition(_, _, Q, Action), Pos, Tape, CFG)| AP])
      catch((
 		do_action(Tape, Pos, Action, NewTape, NewPos),
 		format_configuration(Q, NewTape, NewPos, NCFG),
-		(Q == 'F' -> (print_lines([NCFG|CFG]), halt(0)); true),
-		get_head(NewPos, NewTape, Head),
-		findall(
-			action_path(transition(Q, Head, NQ, NAction), NewPos, NewTape, [NCFG|CFG]),
-			transition(Q, Head, NQ, NAction),
-			ActionPaths
-		),
-		append(AP, ActionPaths, NextAP),
-		try_action_paths(NextAP)
+		% If final state is reached halt computation.
+		(Q == 'F' -> (
+			print_lines([NCFG|CFG]), !)
+		; (
+			get_head(NewPos, NewTape, Head),
+			findall(
+				action_path(transition(Q, Head, NQ, NAction), NewPos, NewTape, [NCFG|CFG]),
+				transition(Q, Head, NQ, NAction),
+				ActionPaths
+			),
+			append(AP, ActionPaths, NextAP),
+			try_action_paths(NextAP)
+		))
 	), abnormal_termination(_), (
 		% Try next action path
 		try_action_paths(AP)
