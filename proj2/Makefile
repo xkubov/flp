@@ -20,3 +20,6 @@ tests: $(OUT)
 
 clean:
 	@rm -f $(OUT)
+
+zip:
+	@zip -r flp-log-xkubov06.zip Makefile README.md tests turing-machine.pl
