@@ -1,5 +1,5 @@
 /**
- * FLP Proeject 2 Turing Machine
+ * FLP Project 2: Turing Machine
  *
  * This program simulates actions of Nondeterministic Turing Machine
  * that are provided on STDIN.
@@ -33,14 +33,15 @@ main(Args) :- format('error: invalid arguments combination: ~w\n', [Args]), usag
 /**
  * Main control flow of the application.
  */
-main_control :-
-    catch(
+main_control :- catch(
         catch((
             read_lines(X), parse_input(X, Tape),
             simulate_machine('S', Tape)
         ), error(MSG), (
             format('error: ~w\n', [MSG]), halt(1)
         )
+    % This should not happen - but if it would happen
+    % we suild certainly like to end abnormaly (no output + return code 0).
     ), abnormal_termination(_), true
 ).
 
@@ -52,9 +53,9 @@ simulate_machine(StartN,Tape) :-
     get_head(0, Tape, Head),
     % start simulation of tape on input from nonterminal S
     findall(
-	action_path(transition(StartN, Head, NQ, Action), 0, Tape, [Cfg]),
-	transition(StartN, Head, NQ, Action),
-	ActionPaths
+        action_path(transition(StartN, Head, NQ, Action), 0, Tape, [Cfg]),
+        transition(StartN, Head, NQ, Action),
+        ActionPaths
     ),
     try_action_paths(ActionPaths).
 
@@ -64,25 +65,25 @@ simulate_machine(StartN,Tape) :-
 try_action_paths([]) :- true.
 try_action_paths([action_path(transition(_, _, Q, Action), Pos, Tape, CFG)| AP]) :-
      catch((
-		do_action(Tape, Pos, Action, NewTape, NewPos),
-		format_configuration(Q, NewTape, NewPos, NCFG),
-		% If final state is reached halt computation.
-		(Q == 'F' -> (
-			print_lines([NCFG|CFG]), !)
-		; (
-			get_head(NewPos, NewTape, Head),
-			findall(
-				action_path(transition(Q, Head, NQ, NAction), NewPos, NewTape, [NCFG|CFG]),
-				transition(Q, Head, NQ, NAction),
-				ActionPaths
-			),
-			append(AP, ActionPaths, NextAP),
-			try_action_paths(NextAP)
-		))
-	), abnormal_termination(_), (
-		% Try next action path
-		try_action_paths(AP)
-	)).
+        do_action(Tape, Pos, Action, NewTape, NewPos),
+        format_configuration(Q, NewTape, NewPos, NCFG),
+        % If final state is reached halt computation.
+        (Q == 'F' -> (
+            print_lines([NCFG|CFG]), !)
+        ; (
+            get_head(NewPos, NewTape, Head),
+            findall(
+                action_path(transition(Q, Head, NQ, NAction), NewPos, NewTape, [NCFG|CFG]),
+                transition(Q, Head, NQ, NAction),
+                ActionPaths
+            ),
+            append(AP, ActionPaths, NextAP),
+            try_action_paths(NextAP)
+        ))
+    ), abnormal_termination(_), (
+        % Try next action path
+        try_action_paths(AP)
+    )).
 
 /**
  * Substitutes symbol on Tape on specified posistion.
@@ -230,7 +231,7 @@ append([], X, X).
 append([X | Y], Z, [X | W]) :- append(Y, Z, W).
 
 usage :-
-	write('usage: flp20-log <option>\n'),
-	write('<option>:\n'),
-	write('    -t prints execution time in miliseconds at the end of output.\n'),
-	write('    -h prints this help.\n').
+    write('usage: flp20-log <option>\n'),
+    write('<option>:\n'),
+    write('    -t prints execution time in miliseconds at the end of output.\n'),
+    write('    -h prints this help.\n').
