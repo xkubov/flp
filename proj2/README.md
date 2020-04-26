@@ -86,3 +86,25 @@ $ make tests
 This will result in compilation and run of `flp20-log` with included tests set. Each test is defined
 in `tests/in/test*` and should have output to compare located in `tests/out/test*` (Same name).
 After invocation each run will be measured and output of tests will be provided on `stdout`.
+Apart from testing of output measurement of time is provided.
+
+Example of running `make tests`:
+
+```
+Testing Turing Machine
+===========================
+Measuring times
+	in/test10: 2.000000ms
+	in/test04: 0.000000ms
+	in/test03: 1.000000ms
+	in/test02: 1.000000ms
+	in/test05: 0.000000ms
+	in/test09: 1.000000ms
+	in/test00: 0.000000ms
+	in/test07: 2.000000ms
+	in/test06: 0.000000ms
+	in/test01: 1.000000ms
+	in/test08: 1.000000ms
+Passed  11/11 tests
+===========================
+```

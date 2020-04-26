@@ -21,10 +21,12 @@ function run()
 	total=0
 
 	in_files="$(find $I_DIR -type f)"
+	echo "Measuring times"
 	for i in $in_files; do
 		expected=$(echo $i | sed "s/in/out/")
 		test "$(cat $expected)" != "$($PROG < $i 2>/dev/null)" && failed="$failed $i|$expected" && failed_count=$((++failed_count))
 		total=$((++total))
+		echo -e "\t$i:" "$($PROG -t < $i | tail -n 1)ms"
 	done
 
 	echo "Passed " $((total-failed_count))/$total "tests"
