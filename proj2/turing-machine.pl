@@ -14,12 +14,14 @@
 :- dynamic transition/4.
 
 main([]) :- main_control, !.
-main(_) :-
-       statistics(runtime,[Start|_]),
-	main_control,
-	statistics(runtime,[End|_]),
-	Runtime is End - Start,
-	format('execution: ~fms\n', [Runtime]), !.
+main(['-t']) :-
+    statistics(runtime,[Start|_]),
+    main_control,
+    statistics(runtime,[End|_]),
+    Runtime is End - Start,
+    format('~f\n', [Runtime]), !.
+main(['-h']) :- usage, !.
+main(Args) :- format('error: invalid arguments combination: ~w\n', [Args]), usage, halt(1).
 
 main_control :-
     catch(
@@ -216,3 +218,9 @@ is_eof_eol(C) :- char_code(C, Code), Code == 10.
  */
 append([], X, X).
 append([X | Y], Z, [X | W]) :- append(Y, Z, W).
+
+usage :-
+	write('usage: flp20-log <option>\n'),
+	write('<option>:\n'),
+	write('    -t prints execution time in miliseconds at the end of output.\n'),
+	write('    -h prints this help.\n').

@@ -27,6 +27,19 @@ And tape:
 
 Each state must satisfy regex `[A-Z]` and each symbol must comfort regex `[a-z]`.
 
+# Usage
+
+When run `flp20-log -h` from command line you will be provided with following
+help screen:
+
+```
+usage: flp20-log <option>
+<option>:
+    -t prints execution time in miliseconds at the end of output.
+    -h prints this help.
+
+```
+
 # About Implementation
 
 Simulation of Turing machine is implemented using BFS algorithm so that if final configuration exists
