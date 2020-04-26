@@ -13,19 +13,6 @@
  */
 :- dynamic transition/4.
 
-/**
- * param 1: next_action,
- * param 2: current head pos,
- * param 3: current tape,
- * param 4: configuration until now.
- */
-:- dynamic action_path/3.
-
-/**
- * Help for BFS.
- */
-:- dynamic action_paths/1.
-
 main :-
     catch(
         catch((
@@ -34,9 +21,12 @@ main :-
         ), error(MSG), (
             format('error: ~w\n', [MSG]), halt(1)
         )
-    ), abnormal_termination(MSG), halt(0) % (format('abnormal termination: ~w\n', [MSG]), halt(0))
+    ), abnormal_termination(MSG), halt(0)
 ).
 
+/**
+ * Simulates machine on tape from starting nonterminal StartN.
+ */
 simulate_machine(StartN,Tape) :-
     format_configuration(StartN, Tape, 0, Cfg),
     get_head(0, Tape, Head),
@@ -51,13 +41,16 @@ simulate_machine(StartN,Tape) :-
 append([], X, X).
 append([X | Y], Z, [X | W]) :- append(Y, Z, W).
 
+/**
+ * Implements BFS for finding the most suitable action path.
+ */
 try_action_paths([]) :- true.
 try_action_paths([action_path(transition(_, _, Q, Action), Pos, Tape, CFG)| AP]) :-
      catch((
 		do_action(Tape, Pos, Action, NewTape, NewPos),
 		format_configuration(Q, NewTape, NewPos, NCFG),
 		(Q == 'F' -> (print_lines([NCFG|CFG]), halt(0)); true),
-		get_head(NewPos, Tape, Head),
+		get_head(NewPos, NewTape, Head),
 		findall(
 			action_path(transition(Q, Head, NQ, NAction), NewPos, NewTape, [NCFG|CFG]),
 			transition(Q, Head, NQ, NAction),
@@ -65,10 +58,9 @@ try_action_paths([action_path(transition(_, _, Q, Action), Pos, Tape, CFG)| AP])
 		),
 		append(AP, ActionPaths, NextAP),
 		try_action_paths(NextAP)
-	), abnormal_termination(X), (
+	), abnormal_termination(_), (
 		% Try next BFS
-		format('abnormal termination: ~w', [X]),
-		!,try_action_paths(AP)
+		try_action_paths(AP)
 	)).
 
 /**
@@ -94,11 +86,6 @@ move_head(P, D, Tape, NP) :-
 
 /**
  * Checks wheter position stays on tape.
- * TODO:
- *  - we should be able to move head on beyond last position.
- *  - Turing machine should fail on access of element beyond.
- *
- *  test02
  */
 can_move(-1, _) :- false.
 can_move(0, []).
@@ -118,7 +105,6 @@ dec(Pos, NPos) :- NPos is Pos - 1.
 /**
  * Returns symbol under head of turing machine.
  */
-get_head(Tape, Head) :- tm_head_pos(X), get_head(X, Tape, Head).
 get_head(0, [H|_], H) :- !.
 get_head(_, [], _) :- throw(abnormal_termination('head too far')).
 get_head(Pos, [_|T], H) :- dec(Pos, NPos), get_head(NPos, T, H).
@@ -126,27 +112,11 @@ get_head(Pos, [_|T], H) :- dec(Pos, NPos), get_head(NPos, T, H).
 /**
  * Creates printable format string of the TM configuration.
  */
-format_configuration(Q, Tape, FMT) :- tm_head_pos(X), format(Q, Tape, X, FMT).
 format_configuration(Q, [], 0, FMT) :- format(atom(FMT), '~w\n', [Q]), !.
 format_configuration(Q, Tape, 0, FMT) :- format_configuration(Q, Tape, -1, RST), format(atom(FMT), '~w~w', [Q, RST]), !.
 format_configuration(_, [H|T], -1, FMT) :- format_configuration(_, T, -1, RST), format(atom(FMT), '~w~w', [H, RST]), !.
 format_configuration(Q, [H|T], Pos, FMT) :- dec(Pos, NP), format_configuration(Q, T, NP, RST), format(atom(FMT), '~w~w', [H, RST]), !.
 format_configuration(_, [], _, '\n') :- !.
-
-/**
- * Resets position of head of TM to position specified by parameter.
- */
-reset_position(ResetPos) :- tm_head_pos(X), retract(tm_head_pos(X)), assert(tm_head_pos(ResetPos)).
-
-/**
- * Resets end configuration of TM to end configuration specified by parameter.
- */
-reset_tm_end_configuration(NewConfig) :- tm_end_configuration(X), retract(tm_end_configuration(X)), assert(tm_end_configuration(NewConfig)).
-
-/**
- * Adds configuration to the end configuration of TM.
- */
-add_to_end_configuration(X) :- tm_end_configuration(EndConfig), reset_tm_end_configuration([X|EndConfig]).
 
 /**
  * Preforms action on tape specified by parameter.

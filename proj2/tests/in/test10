@@ -10,8 +10,8 @@ A a A R
 A c S R
 A b A x
 A x B R
-# Turing machine should not fail when moved far right.
 B a B x
+# Turing machine should not fail when moved far right.
 B x F R
 B b S R
 B c S R
